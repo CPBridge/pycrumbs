@@ -51,12 +51,12 @@ includes:
 - A list of all packages currently, with their versions.
 
 You can very easily add a job record to a function using the `tracked`
-decorator in the `pycrumbs` module. It is generally assumed
-that a tracked function will create some file output within a given output
+decorator in the `pycrumbs` module. It is assumed
+that a tracked function will create output files within a given output
 directory, and that the job record file (a JSON file) should be placed in
 the same directory. `tracked` gives you various options on how to
 specify where the output location is, including intercepting runtime
-parameters of the decorated function.
+parameters of the decorated function:
 
 Specify a literal output location (always the same).
 
@@ -65,7 +65,7 @@ from pathlib import Path
 from pycrumbs import tracked
 
 
-@tracked(literal_directory=Path('/mnt/share/checkpoints'))
+@tracked(literal_directory=Path('/home/user/proj/'))
 def my_train_fun():
     # Do something...
     pass
@@ -156,7 +156,7 @@ from typing import Optional
 from pycrumbs import tracked
 
 @tracked(
-    literal_directory=Path('/mnt/share/model_checkpoints/'),
+    literal_directory=Path('/home/user/proj/'),
     include_uuid=True,
     directory_injection_parameter='model_directory'
 )
@@ -168,9 +168,9 @@ def my_train_fun(
     pass
 
 # Record will be placed at, e.g.
-# /mnt/share/model_checkpoints_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2/my_train_fun_record.json
+# /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2/my_train_fun_record.json
 my_train_fun()
-# prints /home/user/proj/my_model_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
+# prints /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
 ```
 
 Additionally specify a seed parameter by intercepting the runtime value of
