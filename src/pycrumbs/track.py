@@ -433,7 +433,7 @@ def tracked(
     >>> from pathlib import Path
     >>> from pycrumbs import tracked
     >>>
-    >>> @tracked(literal_directory=Path('/mnt/share/checkpoints'))
+    >>> @tracked(literal_directory=Path('/home/user/proj/'))
     >>> def my_train_fun():
     >>>     # Do something...
     >>>     pass
@@ -458,7 +458,8 @@ def tracked(
 
     Specify an output location that is determined dynamically by intercepting
     the runtime value of a parameter of the decorated function to use as the
-    sub-directory of a literal location.
+    sub-directory of a literal location. This is useful when only the final
+    part of the path changes between different times the function is run.
 
     >>> from pathlib import Path
     >>> from pycrumbs import tracked
@@ -514,7 +515,7 @@ def tracked(
     >>> from pycrumbs import tracked
     >>>
     >>> @tracked(
-    ...     literal_directory=Path('/mnt/share/model_checkpoints/'),
+    ...     literal_directory=Path('/home/user/proj/'),
     ...     include_uuid=True,
     ...     directory_injection_parameter='model_directory'
     ... )
@@ -526,9 +527,9 @@ def tracked(
     >>>     pass
     >>>
     >>> # Record will be placed at, e.g.
-    >>> # /mnt/share/model_checkpoints_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2/my_train_fun_record.json
+    >>> # /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2/my_train_fun_record.json
     >>> my_train_fun()
-    >>> # prints /home/user/proj/my_model_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
+    >>> # prints /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
 
     Additionally specify a seed parameter by intercepting the runtime value of
     a parameter of the decorated function. This is always recommended as it

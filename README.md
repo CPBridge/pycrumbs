@@ -92,9 +92,10 @@ def my_train_fun(model_output_dir: Path):
 my_train_fun(model_output_dir=Path('/home/user/proj/my_model'))
 ```
 
-Specify an output location by intercepting the runtime value of a parameter
-of the decorated function to use as the sub-directory of a literal
-location.
+Specify an output location that is determined dynamically by intercepting
+the runtime value of a parameter of the decorated function to use as the
+sub-directory of a literal location. This is useful when only the final
+part of the path changes between different times the function is run.
 
 ```python
 from pathlib import Path
@@ -348,4 +349,3 @@ like the ones in the example above:
     "seed": 106543
 }
 ```
-
