@@ -98,7 +98,7 @@ def get_environment_info(
     info['python_implementation'] = sys.implementation.name
     info['python_executable'] = sys.executable
     info['cwd'] = getcwd()
-    info['node'] = platform.node()
+    info['hostname'] = platform.node()
     info['python_path'] = sys.path
     info['cpu_count'] = mp.cpu_count()
     try:
