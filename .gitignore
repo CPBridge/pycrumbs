@@ -1,0 +1,11 @@
+*.egg-info
+cover
+.coverage
+*.pyc
+__pycache__
+.ipynb_checkpoints/
+.DS_Store
+.mypy_cache/
+*.log
+.python-version
+build/
