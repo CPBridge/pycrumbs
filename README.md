@@ -48,7 +48,7 @@ includes:
   want to install your package code with pip, use the
   `pip install --editable` option to allow for tracking with this
   decorator.
-- A list of all packages currently, with their versions.
+- A list of all Python packages currently installed, with their versions.
 
 You can very easily add a job record to a function using the `tracked`
 decorator in the `pycrumbs` module. It is assumed
