@@ -116,7 +116,7 @@ my_train_fun(model_name='my_model')
 ```
 
 You may also have the decorator dynamically add a timestamp
-(`append_timestamp`) or a UUID (`include_uuid`) to the output directory to
+(`include_timestamp`) or a UUID (`include_uuid`) to the output directory to
 ensure that each run results in a unique output directory. If you do this
 in combination with `output_dir_parameter` or `subdirectory_name_parameter`, the
 value of the relevant parameter will be updated to reflect the addition
@@ -174,10 +174,22 @@ my_train_fun()
 # prints /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
 ```
 
-Additionally specify a seed parameter by intercepting the runtime value of
-a parameter of the decorated function. This is always recommended as it
-allows re-running the job with the same seed without having to change the
-code.
+#### Seeds
+
+In addition to tracking your function call, `pycrumbs` also handles seeding
+random number generators for you and storing the seed in the record file
+so that you can reproduce the run later, if needed. `pycrumbs` knows how to
+seed random number generators in the following libraries and will do so if
+they are installed:
+
+- The Python standard library `random` module.
+- Numpy
+- Tensorflow
+- Pytorch
+
+Additionally you may specify a seed parameter by intercepting the runtime value
+of a parameter of the decorated function. This is always recommended as it
+allows re-running the job with the same seed without having to change the code.
 
 ```python
 from pathlib import Path
@@ -193,8 +205,8 @@ def my_train_fun(model_name: str, seed: int | None = None):
     # Do something...
     print(seed)
 
-# Seed will be injected at runtime by the decorator mechanism,
-# you don't have to do anything else
+# Seed will be injected at runtime by the decorator mechanism and stored in the
+# record file, you don't have to do anything else
 my_train_fun(model_name='my_model')
 # prints e.g. 272428
 
@@ -204,12 +216,14 @@ my_train_fun(model_name='my_model', seed=272428)
 # prints 272428
 ```
 
-If you use this decorator in combination with decorators from the `click`
-module (and most other common decorators), you should place this decorator
-last. This is because the `click` decorators alter the function signature,
-which will break the operation of `tracked`. The last decorator is
-applied first, meaning that it will operate on the function with its
-original signature as intended.
+#### Combining with Other Decorators
+
+If you use this decorator in combination with decorators such as those from the
+`click` module (and most other common decorators), you should place this
+decorator last. This is because the `click` decorators alter the function
+signature, which will break the operation of `tracked`. The last decorator is
+applied first, meaning that it will operate on the function with its original
+signature as intended.
 
 ```python
 from pathlib import Path
