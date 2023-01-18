@@ -271,7 +271,7 @@ like the ones in the example above:
         "python_implementation": "cpython",
         "python_executable": "/Users/chris/.pyenv/versions/pycrumbs/bin/python",
         "cwd": "/Users/chris/Developer/project",
-        "node": "hostname.example.com",
+        "hostname": "hostname.example.com",
         "python_path": [
             "/Users/chris/Developer/project",
             "/Users/chris/.pyenv/versions/project/lib/python3.10/site-packages/git/ext/gitdb",
