@@ -1,8 +1,9 @@
 # `pycrumbs`
 
-This is a Python package to create record files of functions. This allows you
-to "follow the breadcrumbs" to figure out how exactly a set of files were
-created. This includes information on the parameters of the functions, the
+This is a Python package to create "record files" of whenever a function is
+executed. This file is placed alongside the output files of your function and
+allows you to "follow the breadcrumbs" to figure out how exactly a set of files
+were created. This includes information on the parameters of the functions, the
 platform and environment it was run in, the versions of all libraries
 installed, and source control information about the current state of the
 project (using git).
@@ -10,6 +11,12 @@ project (using git).
 `pycrumbs` was developed for reproducible machine learning pipelines, but can
 be used for any application where Python code creates output files that may
 need to be reproduced at a later stage.
+
+### Status
+
+`pycrumbs` is currently in an early stage for a trial period. Ultimately, I
+hope to list the module in PyPI when the API is more stable. Until that time,
+there may be API changes at any time and for any reason.
 
 ### Installation
 
