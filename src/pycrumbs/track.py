@@ -221,12 +221,21 @@ def get_git_info(
 
     """
     # Get the current git commit, branch and state
+    no_file_str = (
+        "You appear to be trying to use git tracking on a function or method "
+        "that is not defined in a file, which is not possible. This may be "
+        "because the function is defined in an interactive Python shell."
+    )
     if isinstance(module, str):
         mod = importlib.import_module(module)
         module_name = mod.__name__
+        if not hasattr(mod, '__file__'):
+            raise RuntimeError(no_file_str)
         module_path = mod.__file__
     else:
         module_name = module.__name__
+        if not hasattr(module, '__file__'):
+            raise RuntimeError(no_file_str)
         module_path = module.__file__
 
     try:
