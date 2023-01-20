@@ -484,7 +484,6 @@ def tracked(
     updated to reflect the addition of the UUID/timestamp.
 
     >>> from pathlib import Path
-    >>> from typing import Optional
     >>> from pycrumbs import tracked
     >>>
     >>> @tracked(
@@ -511,7 +510,6 @@ def tracked(
     this at any time for your convenience.
 
     >>> from pathlib import Path
-    >>> from typing import Optional
     >>> from pycrumbs import tracked
     >>>
     >>> @tracked(
@@ -520,7 +518,7 @@ def tracked(
     ...     directory_injection_parameter='model_directory'
     ... )
     >>> def my_train_fun(
-    ...     model_directory: Optional[Path] = None
+    ...     model_directory: Path | None
     ... ):
     >>>     print(model_directory)
     >>>     # Do something...

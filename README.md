@@ -132,7 +132,6 @@ of the UUID/timestamp.
 
 ```python
 from pathlib import Path
-from typing import Optional
 from pycrumbs import tracked
 
 @tracked(
@@ -161,7 +160,6 @@ this at any time for your convenience.
 
 ```python
 from pathlib import Path
-from typing import Optional
 from pycrumbs import tracked
 
 @tracked(
@@ -170,7 +168,7 @@ from pycrumbs import tracked
     directory_injection_parameter='model_directory'
 )
 def my_train_fun(
-    model_directory: Optional[Path] = None
+    model_directory: Path | None
 ):
     print(model_directory)
     # Do something...
@@ -221,6 +219,7 @@ my_train_fun(model_name='my_model')
 # But you can manually specify the seed later to reproduce, without
 # having to alter the function signature
 my_train_fun(model_name='my_model', seed=272428)
+from typing import Optional
 # prints 272428
 ```
 
