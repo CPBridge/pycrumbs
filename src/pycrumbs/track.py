@@ -101,7 +101,7 @@ def get_environment_info() -> Dict[str, Any]:
         info['user'] = ''
 
     # This file is created during container the build process for repos
-    # created with the cookiecutter-dso tool and captures the git commit hash
+    # created with the cookiecutter-qtim tool and captures the git commit hash
     # of the repo containing the docker file upon the building of the Docker
     # image
     if DOCKER_BUILD_HASH_LOCATION.exists():
@@ -635,12 +635,35 @@ def tracked(
 
     def decorator(function: Callable) -> Callable:
 
-        # Get list of packages, can be done when function is defined
-        if include_package_inventory:
-            package_inventory = get_installed_packages()
-
-        # Get the function signature to bind arguments later
+        # Get the function signature check parameters (and use to bind later)
         signature = inspect.signature(function)
+
+        # Check all parameters specified actually exist
+        if directory_parameter is not None:
+            output_dir_parameter_loc = cast(str, directory_parameter)
+            if output_dir_parameter_loc not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{output_dir_parameter_loc}' "
+                    "for function '{function.__name__}'."
+                )
+        if subdirectory_name_parameter is not None:
+            if subdirectory_name_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameters '{subdirectory_name_parameter}' "
+                    "for function '{function.__name__}'."
+                )
+        if directory_injection_parameter is not None:
+            if directory_injection_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{directory_injection_parameter}' "
+                    f"for function '{function.__name__}'."
+                )
+        if seed_parameter is not None:
+            if seed_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{seed_parameter}' for function "
+                    f"'{function.__name__}'."
+                )
 
         # Get information about source file to track the function
         try:
@@ -675,36 +698,13 @@ def tracked(
         # invocations
         environment_info = get_environment_info()
 
+        # Get list of packages, assumed not to change between calls
+        if include_package_inventory:
+            package_inventory = get_installed_packages()
+
         record_name_local = (
             record_filename or f'{function.__name__}_record'
         )
-
-        # Check all parameters specified actually exist
-        if directory_parameter is not None:
-            output_dir_parameter_loc = cast(str, directory_parameter)
-            if output_dir_parameter_loc not in signature.parameters:
-                raise ValueError(
-                    f"No such parameter '{output_dir_parameter_loc}' "
-                    "for function '{function.__name__}'."
-                )
-        if subdirectory_name_parameter is not None:
-            if subdirectory_name_parameter not in signature.parameters:
-                raise ValueError(
-                    f"No such parameters '{subdirectory_name_parameter}' "
-                    "for function '{function.__name__}'."
-                )
-        if directory_injection_parameter is not None:
-            if directory_injection_parameter not in signature.parameters:
-                raise ValueError(
-                    f"No such parameter '{directory_injection_parameter}' "
-                    f"for function '{function.__name__}'."
-                )
-        if seed_parameter is not None:
-            if seed_parameter not in signature.parameters:
-                raise ValueError(
-                    f"No such parameter '{seed_parameter}' for function "
-                    f"'{function.__name__}'."
-                )
 
         # The actual wrapped function
         @functools.wraps(function)
