@@ -1,4 +1,5 @@
 """Utilities to create and store records of jobs."""
+from copy import deepcopy
 import datetime
 import functools
 from getpass import getuser
@@ -59,9 +60,7 @@ def _format_json(obj: Any, char_limit: Optional[int] = None) -> Any:
             return string
 
 
-def get_environment_info(
-    extra_environment_variables: Optional[Sequence[str]] = None
-) -> Dict[str, Any]:
+def get_environment_info() -> Dict[str, Any]:
     """Get information about the current environment in a dictionary.
 
     The following information is included:
@@ -71,11 +70,6 @@ def get_environment_info(
     - date and time the job was run
     - list of GPUs that were available to the job
     - list of command line arguments that began the process
-
-    Parameters
-    ----------
-    extra_environment_variables: Optional[Sequence[str]]
-        Names of extra environment variables to include in the job record.
 
     Returns
     -------
@@ -115,8 +109,30 @@ def get_environment_info(
             docker_build_hash: Optional[str] = f.read().splitlines()[0]
         info['git_hash_at_docker_build'] = docker_build_hash
 
+    return info
+
+
+def get_environment_vars(
+    extra_environment_variables: Optional[Sequence[str]] = None
+) -> Dict[str, Any]:
+    """Get values for some environment variables.
+
+    There is a pre-defined list, and the user may additionally specify
+    further values.
+
+    Parameters
+    ----------
+    extra_environment_variables: Optional[Sequence[str]]
+        Names of extra environment variables to include in the job record.
+
+    Returns
+    -------
+    dict
+        Dictionary containing a mapping of variable name to value.
+
+    """
     # A list of environment variables to store
-    info['environment_variables'] = {}
+    vars_dict = {}
     var_list = [
         'CUDA_VISIBLE_DEVICES',
         'VIRTUAL_ENV',
@@ -128,9 +144,9 @@ def get_environment_info(
     if extra_environment_variables is not None:
         var_list += extra_environment_variables
     for var in var_list:
-        info['environment_variables'][var] = environ.get(var)
+        vars_dict[var] = environ.get(var)
 
-    return info
+    return vars_dict
 
 
 try:
@@ -619,6 +635,78 @@ def tracked(
 
     def decorator(function: Callable) -> Callable:
 
+        # Get list of packages, can be done when function is defined
+        if include_package_inventory:
+            package_inventory = get_installed_packages()
+
+        # Get the function signature to bind arguments later
+        signature = inspect.signature(function)
+
+        # Get information about source file to track the function
+        try:
+            source_file = inspect.getsourcefile(function)
+        except TypeError:
+            source_file = None
+
+        # Git information about the file in which the function is defined
+        if not disable_git_tracking:
+            module = inspect.getmodule(function)
+            if module is None:
+                raise RuntimeError(
+                    'Could not determine module for the decorated '
+                    'function.'
+                )
+            git_info = get_git_info(
+                module,
+                allow_dirty=allow_dirty_repo
+            )
+
+        # Git info on other requested modules
+        if extra_modules is not None:
+            extra_modules_git_info = {
+                m if isinstance(m, str) else m.__name__: get_git_info(
+                    m,
+                    allow_dirty=allow_dirty_repo
+                )
+                for m in extra_modules
+            }
+
+        # Get (static) environment information assumed not to change between
+        # invocations
+        environment_info = get_environment_info()
+
+        record_name_local = (
+            record_filename or f'{function.__name__}_record'
+        )
+
+        # Check all parameters specified actually exist
+        if directory_parameter is not None:
+            output_dir_parameter_loc = cast(str, directory_parameter)
+            if output_dir_parameter_loc not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{output_dir_parameter_loc}' "
+                    "for function '{function.__name__}'."
+                )
+        if subdirectory_name_parameter is not None:
+            if subdirectory_name_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameters '{subdirectory_name_parameter}' "
+                    "for function '{function.__name__}'."
+                )
+        if directory_injection_parameter is not None:
+            if directory_injection_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{directory_injection_parameter}' "
+                    f"for function '{function.__name__}'."
+                )
+        if seed_parameter is not None:
+            if seed_parameter not in signature.parameters:
+                raise ValueError(
+                    f"No such parameter '{seed_parameter}' for function "
+                    f"'{function.__name__}'."
+                )
+
+        # The actual wrapped function
         @functools.wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             record: Dict[str, Any] = {}
@@ -632,15 +720,22 @@ def tracked(
                 'start_time': str(start_time)
             }
 
-            record['environment'] = get_environment_info(
+            # Add in copy of environment info
+            record['environment'] = deepcopy(environment_info)
+
+            # Environment variables could in principle change between different
+            # invocations of the function (though probably shouldn't...)
+            # To be safe, they are gathered every time
+            record['environment'][
+                'environment_variables'
+            ] = get_environment_vars(
                 extra_environment_variables=extra_environment_variables
-             )
+            )
 
             if include_package_inventory:
-                record['package_inventory'] = get_installed_packages()
+                record['package_inventory'] = package_inventory
 
             # Information about the called function
-            signature = inspect.signature(function)
             try:
                 bound_args = signature.bind(*args, **kwargs)
             except TypeError:
@@ -653,10 +748,6 @@ def tracked(
                 else:
                     raise
             bound_args.apply_defaults()
-            try:
-                source_file = inspect.getsourcefile(function)
-            except TypeError:
-                source_file = None
             record['called_function'] = {
                 'name': function.__name__,
                 'module': function.__module__,
@@ -668,46 +759,20 @@ def tracked(
             }
 
             if not disable_git_tracking:
-                module = inspect.getmodule(function)
-                if module is None:
-                    raise RuntimeError(
-                        'Could not determine module for the decorated '
-                        'function.'
-                    )
-                record['tracked_module'] = get_git_info(
-                    module,
-                    allow_dirty=allow_dirty_repo
-                )
+                record['tracked_module'] = git_info
             if extra_modules is not None:
-                record['extra_tracked_modules'] = {
-                    m if isinstance(m, str) else m.__name__: get_git_info(
-                        m,
-                        allow_dirty=allow_dirty_repo
-                    )
-                    for m in extra_modules
-                }
+                record['extra_tracked_modules'] = extra_modules_git_info
 
             if literal_directory is not None:
                 record_dir = Path(literal_directory)
             else:
                 # Mypy can't figure out that this must be non-None due to
                 # earlier checks
-                output_dir_parameter_loc = cast(str, directory_parameter)
-                if output_dir_parameter_loc not in bound_args.arguments:
-                    raise ValueError(
-                        f"No such argument '{output_dir_parameter_loc}' "
-                        "for function '{function.__name__}'."
-                    )
                 record_dir = Path(
                     bound_args.arguments[output_dir_parameter_loc]
                 )
 
             if subdirectory_name_parameter is not None:
-                if subdirectory_name_parameter not in bound_args.arguments:
-                    raise ValueError(
-                        f"No such argument '{subdirectory_name_parameter}' "
-                        "for function '{function.__name__}'."
-                    )
                 record_dir.mkdir(exist_ok=True, parents=create_parents)
                 subdir_name = bound_args.arguments[subdirectory_name_parameter]
 
@@ -723,11 +788,6 @@ def tracked(
 
             seed: Optional[int] = None
             if seed_parameter is not None:
-                if seed_parameter not in bound_args.arguments:
-                    raise ValueError(
-                        f"No such argument '{seed_parameter}' for function "
-                        f"'{function.__name__}'."
-                    )
                 seed_ = bound_args.arguments[seed_parameter]
                 if not isinstance(seed_, int) and seed_ is not None:
                     raise TypeError(
@@ -746,11 +806,6 @@ def tracked(
 
             # Inject the final output directory
             if directory_injection_parameter is not None:
-                if directory_injection_parameter not in bound_args.arguments:
-                    raise ValueError(
-                        f"No such argument '{directory_injection_parameter}' "
-                        f"for function '{function.__name__}'."
-                    )
                 bound_args.arguments[
                     directory_injection_parameter
                 ] = record_dir
@@ -783,9 +838,6 @@ def tracked(
                 for k, v in bound_args.arguments.items()
             }
 
-            record_name_local = (
-                record_filename or f'{function.__name__}_record'
-            )
             full_record_path = record_dir / record_name_local
             write_record(full_record_path, record=record)
 
