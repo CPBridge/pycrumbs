@@ -219,7 +219,6 @@ my_train_fun(model_name='my_model')
 # But you can manually specify the seed later to reproduce, without
 # having to alter the function signature
 my_train_fun(model_name='my_model', seed=272428)
-from typing import Optional
 # prints 272428
 ```
 
