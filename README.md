@@ -14,18 +14,16 @@ need to be reproduced at a later stage.
 
 ### Installation
 
-You can install the package directly from this repo using pip:
+You can install the latest release of the package from PyPI:
+
+```
+pip install pycrumbs
+```
+
+Or you can install the package directly from the repo using pip:
 
 ```
 pip install git+https://github.com/CPBridge/pycrumbs
-```
-
-I recommend specifying a particular git hash to ensure you can re-install the
-same version later (`9aa7825e` here is an example git hash, you should take
-the latest from above):
-
-```
-pip install git+https://github.com/CPBridge/pycrumbs@9aa7825e
 ```
 
 ### Use
