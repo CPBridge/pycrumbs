@@ -11,7 +11,7 @@ keywords = ["tracking", "vcs", "version control"]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: MIT License",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Quality Assurance",
