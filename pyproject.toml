@@ -1,10 +1,25 @@
 [tool.poetry]
 name = "pycrumbs"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tool for automatically storing information about Python processes."
 authors = ["Chris Bridge <chrisbridge44@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/CPBridge/pycrumbs"
+homepage = "https://github.com/CPBridge/pycrumbs"
+keywords = ["tracking", "vcs", "version control"]
+classifiers = [
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Version Control",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7"
