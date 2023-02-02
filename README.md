@@ -12,12 +12,6 @@ project (using git).
 be used for any application where Python code creates output files that may
 need to be reproduced at a later stage.
 
-### Status
-
-`pycrumbs` is currently in an early stage for a trial period. Ultimately, I
-hope to list the module in PyPI when the API is more stable. Until that time,
-there may be API changes at any time and for any reason.
-
 ### Installation
 
 You can install the package directly from this repo using pip:
@@ -36,7 +30,7 @@ pip install git+https://github.com/CPBridge/pycrumbs@9aa7825e
 
 ### Use
 
-The sole purpose of this library is to create "record" files for a Python
+The sole purpose of this library is to create "record" files for Python
 functions that execute. The intended use of this is to "track" calls to key
 functions (such as machine learning training or preprocessing routines) to
 ensure that they can be reproduced later. The type of information captured
@@ -179,6 +173,21 @@ def my_train_fun(
 my_train_fun()
 # prints /home/user/proj_2dddbaa6-620f-4aaa-9883-eb3557dbbdb2
 ```
+
+#### Git Versioning
+
+Unless the `disable_git_tracking` parameter is set, `pycrumbs` will try to
+include the git versioning information of the source code where the function
+is defined. This implies two requirements:
+
+1. The function is defined in a file. If you try to track a function defined
+   interactively in a REPL, it won't work!
+2. The source code containing the tracked function is in a git repository on
+   your filesystem. If you have a repository tracked using git, but then `pip
+   install` the package to run it, since the source file actually being executed
+   is the installed copy of the one under version control. In this siutation,
+   you should install using the `-e` flag, such that the executed version of
+   the file is the same as the one under version control.
 
 #### Seeds
 
