@@ -206,7 +206,7 @@ def seed_tasks(seed: Optional[int] = None) -> int:
     # Tensorflow
     if _have_tensorflow:
         import tensorflow as tf  # noqa: F811
-        tf.random.seed_tasks(seed)
+        tf.random.set_seed(seed)
 
     # Pytorch
     if _have_torch:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycrumbs"
-version = "0.1.2"
+version = "0.1.3"
 description = "Tool for automatically storing information about Python processes."
 authors = ["Chris Bridge <chrisbridge44@gmail.com>"]
 license = "MIT"
