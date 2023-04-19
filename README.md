@@ -82,7 +82,7 @@ from pathlib import Path
 from pycrumbs import tracked
 
 
-@tracked(dirctory_parameter='model_output_dir'))
+@tracked(directory_parameter='model_output_dir'))
 def my_train_fun(model_output_dir: Path):
     # Do something...
     pass
