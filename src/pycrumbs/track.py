@@ -14,7 +14,7 @@ import platform
 import random
 import sys
 from types import ModuleType
-from typing import Any, Callable, Dict, Optional, Union, Sequence, cast
+from typing import Any, Callable, Dict, Optional, Union, Sequence, cast, List
 from uuid import uuid4
 
 import git
@@ -314,8 +314,6 @@ def write_record(
 
     """
     # Save the record to file
-    if not record_path.name.endswith('.json'):
-        record_path = record_path.with_name(record_path.stem + '.json')
     with record_path.open('w') as jf:
         json.dump(record, jf, indent=4)
 
@@ -337,6 +335,7 @@ def tracked(
     include_package_inventory: bool = True,
     create_parents: bool = False,
     require_empty_directory: bool = False,
+    chain_records: bool = False
 ) -> Callable:
     """Store information about a function call to disc.
 
@@ -449,6 +448,10 @@ def tracked(
         directory_parameter and subdirectory_name_parameter are not specified
         so that the called decorated function is aware of the location of the
         output directory. It may be used in other situations for convenience.
+    chain_records: bool
+        If True, a pre-existing record file will have a new record appended to
+        it within the same file. If False, a pre-existing record file will be 
+        overwritten.
 
     Examples
     --------
@@ -839,7 +842,30 @@ def tracked(
             }
 
             full_record_path = record_dir / record_name_local
-            write_record(full_record_path, record=record)
+
+            if not full_record_path.name.endswith(".json"):
+                full_record_path = full_record_path.with_name(
+                    full_record_path.stem + ".json"
+                )
+
+            chaining = False
+            if chain_records:
+                if full_record_path.exists():
+                    chaining = True
+                    with full_record_path.open("r") as jf:
+                        previous_record = json.load(jf)
+
+                    if isinstance(previous_record, List):
+                        out_record = previous_record + [record]
+
+                    else:
+                        out_record = [previous_record, record]
+                else:
+                    out_record = record
+            else:
+                out_record = record
+
+            write_record(full_record_path, record=out_record)
 
             # Run the function as normal
             result = function(*bound_args.args, **bound_args.kwargs)
@@ -848,7 +874,18 @@ def tracked(
             end_time = datetime.datetime.now()
             record['timing']['end_time'] = str(end_time)
             record['timing']['run_time'] = str(end_time - start_time)
-            write_record(full_record_path, record=record)
+
+            if chaining:
+                if isinstance(previous_record, List):
+                    out_record = previous_record + [record]
+
+                else:
+                    out_record = [previous_record, record]
+
+            else:
+                out_record = record
+            
+            write_record(full_record_path, record=out_record)
 
             return result
 
