@@ -314,6 +314,8 @@ def write_record(
 
     """
     # Save the record to file
+    if not record_path.name.endswith('.json'):
+        record_path = record_path.with_name(record_path.stem + '.json')
     with record_path.open('w') as jf:
         json.dump(record, jf, indent=4)
 
