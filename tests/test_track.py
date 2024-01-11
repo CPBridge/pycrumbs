@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 from uuid import uuid4
+from typing import Dict, List
 
 import pycrumbs
 from pycrumbs import track
@@ -780,3 +781,41 @@ def test_parents():
         some_fun(0)
         assert subdir.exists()
         assert subdir.joinpath('some_fun_record.json').exists()
+
+
+def test_record_chaining():
+    """Test tracked with chain_records is True."""
+    with tempfile.TemporaryDirectory() as temp:
+        temp = Path(temp).resolve()
+
+        @pycrumbs.tracked(literal_directory=temp, chain_records=True)
+        def some_fun(x):
+            pass
+
+        saved_record = temp.joinpath('some_fun_record.json')
+        # If a record does not yet exist, demonstrate regular behavior.
+        assert not saved_record.exists()
+        some_fun(0)
+        assert saved_record.exists()
+        with saved_record.open('r') as jf:
+            record_0 = json.load(jf)
+        assert isinstance(record_0, Dict)
+
+        # If record already exists with 1 element, demonstrate conversion to
+        # list which contains the original record as its first element.
+        some_fun(1)
+        with saved_record.open('r') as jf:
+            record_1 = json.load(jf)
+        assert isinstance(record_1, List)
+        assert len(record_1) == 2
+        assert record_0 == record_1[0]
+
+        # If record already exists as a list of 2+ elements, demonstrate
+        # original elements match previous records and contain a new final element.
+        some_fun(2)
+        with saved_record.open('r') as jf:
+            record_2 = json.load(jf)
+        assert isinstance(record_2, List)
+        assert len(record_2) == 3
+        assert record_0 == record_1[0] == record_2[0]
+        assert record_1[1] == record_2[1]
