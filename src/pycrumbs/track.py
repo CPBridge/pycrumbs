@@ -331,7 +331,7 @@ def tracked(
     record_filename: Optional[str] = None,
     extra_modules: Optional[Sequence[Union[str, ModuleType]]] = None,
     extra_environment_variables: Optional[Sequence[str]] = None,
-    seed_parameter: str = None,
+    seed_parameter: str | None = None,
     disable_git_tracking: bool = False,
     allow_dirty_repo: bool = True,
     include_package_inventory: bool = True,
@@ -394,7 +394,7 @@ def tracked(
         that exists within a git repository.
     extra_environment_variables: Optional[Sequence[str]]
         Names of extra environment variables to include in the job record.
-    seed_parameter: str
+    seed_parameter: Optional[str]
         Name of the parameter of the decorated function to use as a random
         seed. If this parameter is given an integer value at runtime, that
         value will be used to set the random seed for several key libraries
@@ -452,7 +452,7 @@ def tracked(
         output directory. It may be used in other situations for convenience.
     chain_records: bool
         If True, a pre-existing record file will have a new record appended to
-        it within the same file. If False, a pre-existing record file will be 
+        it within the same file. If False, a pre-existing record file will be
         overwritten.
 
     Examples
@@ -886,7 +886,7 @@ def tracked(
 
             else:
                 out_record = record
-            
+
             write_record(full_record_path, record=out_record)
 
             return result
