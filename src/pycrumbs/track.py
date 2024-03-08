@@ -149,39 +149,34 @@ def get_environment_vars(
     return vars_dict
 
 
-try:
-    import tensorflow as tf  # noqa: F401
-    _have_tensorflow = True
-except ImportError:
-    _have_tensorflow = False
-
-try:
-    import torch  # noqa: F401
-    _have_torch = True
-except ImportError:
-    _have_torch = False
-
-try:
-    import numpy as np  # noqa: F401
-    _have_numpy = True
-except ImportError:
-    _have_numpy = False
-
-
-def seed_tasks(seed: Optional[int] = None) -> int:
+def seed_tasks(
+    seed: Optional[int] = None,
+    seed_numpy: Optional[bool] = True,
+    seed_tensorflow: Optional[bool] = True,
+    seed_torch: Optional[bool] = True,
+) -> int:
     """Set random seeds for various libraries.
 
     Currently the following libraries are implemented:
         - The standard library's 'random' module
-        - Numpy (if it is installed)
-        - Tensorflow (if it is installed)
-        - Pytorch (if it is installed)
+        - Numpy (if it is installed and seed_numpy is True)
+        - Tensorflow (if it is installed and seed_tensorflow is True)
+        - Pytorch (if it is installed and seed_torch is True)
 
     Parameters:
     -----------
     seed: Optional[int]
         Value to use as a random seed. Must be a positive integer.
         If no value is provided, a random seed is generated and returned.
+    seed_numpy: Optional[bool]
+        Whether to set the seed for the numpy library. If no value is
+        provided, the seed will be set for numpy.
+    seed_tensorflow: Optional[bool]
+        Whether to set the seed for the tensorflow library. If no value is
+        provided, the seed will be set for tensorflow.
+    seed_torch: Optional[bool]
+        Whether to set the seed for the torch library. If no value is
+        provided, the seed will be set for torch.
 
     Returns
     -------
@@ -199,19 +194,31 @@ def seed_tasks(seed: Optional[int] = None) -> int:
 
     # Set seeds
     # Numpy
-    if _have_numpy:
-        import numpy as np  # noqa: F811
-        np.random.seed(seed)
+    if seed_numpy:
+        try:
+            import numpy as np  # noqa: F811
+            np.random.seed(seed)
+
+        except ImportError:
+            pass
 
     # Tensorflow
-    if _have_tensorflow:
-        import tensorflow as tf  # noqa: F811
-        tf.random.set_seed(seed)
+    if seed_tensorflow:
+        try:
+            import tensorflow as tf  # noqa: F811
+            tf.random.set_seed(seed)
+
+        except ImportError:
+            pass
 
     # Pytorch
-    if _have_torch:
-        import torch  # noqa: F811
-        torch.manual_seed(seed)
+    if seed_torch:
+        try:
+            import torch  # noqa: F811
+            torch.manual_seed(seed)
+
+        except ImportError:
+            pass
 
     return seed
 
@@ -332,6 +339,9 @@ def tracked(
     extra_modules: Optional[Sequence[Union[str, ModuleType]]] = None,
     extra_environment_variables: Optional[Sequence[str]] = None,
     seed_parameter: str | None = None,
+    seed_numpy: Optional[bool] = True,
+    seed_tensorflow: Optional[bool] = True,
+    seed_torch: Optional[bool] = True,
     disable_git_tracking: bool = False,
     allow_dirty_repo: bool = True,
     include_package_inventory: bool = True,
@@ -406,6 +416,15 @@ def tracked(
         mechanism is that during normal use, the decorator is allowed to
         generate its own seed, and a specific value for seed is only provided
         when recreating previous jobs.
+    seed_numpy: Optional[bool]
+        Whether to set the seed for the numpy library. If no value is
+        provided, the seed will be set for numpy.
+    seed_tensorflow: Optional[bool]
+        Whether to set the seed for the tensorflow library. If no value is
+        provided, the seed will be set for tensorflow.
+    seed_torch: Optional[bool]
+        Whether to set the seed for the torch library. If no value is
+        provided, the seed will be set for torch.
     disable_git_tracking: bool
         Do not include version control information for the decorated function.
         This allows the use of this decorator when the decorated function
@@ -802,7 +821,7 @@ def tracked(
                         "'{function.__name__}'."
                     )
                 seed = seed_
-            seed = seed_tasks(seed)
+            seed = seed_tasks(seed, seed_numpy, seed_tensorflow, seed_torch)
             record['seed'] = seed
 
             # Inject the seed parameter
