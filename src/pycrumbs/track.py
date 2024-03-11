@@ -151,9 +151,9 @@ def get_environment_vars(
 
 def seed_tasks(
     seed: Optional[int] = None,
-    seed_numpy: Optional[bool] = True,
-    seed_tensorflow: Optional[bool] = True,
-    seed_torch: Optional[bool] = True,
+    seed_numpy: bool = True,
+    seed_tensorflow: bool = True,
+    seed_torch: bool = True,
 ) -> int:
     """Set random seeds for various libraries.
 
@@ -168,13 +168,13 @@ def seed_tasks(
     seed: Optional[int]
         Value to use as a random seed. Must be a positive integer.
         If no value is provided, a random seed is generated and returned.
-    seed_numpy: Optional[bool]
+    seed_numpy: bool
         Whether to set the seed for the numpy library. If no value is
         provided, the seed will be set for numpy.
-    seed_tensorflow: Optional[bool]
+    seed_tensorflow: bool
         Whether to set the seed for the tensorflow library. If no value is
         provided, the seed will be set for tensorflow.
-    seed_torch: Optional[bool]
+    seed_torch: bool
         Whether to set the seed for the torch library. If no value is
         provided, the seed will be set for torch.
 
@@ -339,9 +339,9 @@ def tracked(
     extra_modules: Optional[Sequence[Union[str, ModuleType]]] = None,
     extra_environment_variables: Optional[Sequence[str]] = None,
     seed_parameter: str | None = None,
-    seed_numpy: Optional[bool] = True,
-    seed_tensorflow: Optional[bool] = True,
-    seed_torch: Optional[bool] = True,
+    seed_numpy: bool = True,
+    seed_tensorflow: bool = True,
+    seed_torch: bool = True,
     disable_git_tracking: bool = False,
     allow_dirty_repo: bool = True,
     include_package_inventory: bool = True,
@@ -416,13 +416,13 @@ def tracked(
         mechanism is that during normal use, the decorator is allowed to
         generate its own seed, and a specific value for seed is only provided
         when recreating previous jobs.
-    seed_numpy: Optional[bool]
+    seed_numpy: bool
         Whether to set the seed for the numpy library. If no value is
         provided, the seed will be set for numpy.
-    seed_tensorflow: Optional[bool]
+    seed_tensorflow: bool
         Whether to set the seed for the tensorflow library. If no value is
         provided, the seed will be set for tensorflow.
-    seed_torch: Optional[bool]
+    seed_torch: bool
         Whether to set the seed for the torch library. If no value is
         provided, the seed will be set for torch.
     disable_git_tracking: bool
