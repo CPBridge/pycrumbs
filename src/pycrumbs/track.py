@@ -338,7 +338,7 @@ def tracked(
     record_filename: Optional[str] = None,
     extra_modules: Optional[Sequence[Union[str, ModuleType]]] = None,
     extra_environment_variables: Optional[Sequence[str]] = None,
-    seed_parameter: str | None = None,
+    seed_parameter: Optional[str] = None,
     seed_numpy: bool = True,
     seed_tensorflow: bool = True,
     seed_torch: bool = True,
