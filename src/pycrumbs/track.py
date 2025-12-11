@@ -9,7 +9,7 @@ import multiprocessing as mp
 from os import environ, getcwd
 from pathlib import Path
 import importlib
-import pkg_resources
+import importlib.metadata
 import platform
 import random
 import sys
@@ -302,7 +302,7 @@ def get_installed_packages() -> Dict[str, str]:
 
     """
     return {
-        p.key: p.version for p in pkg_resources.working_set
+        p.name: p.version for p in importlib.metadata.distributions()
     }
 
 
